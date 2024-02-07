@@ -34,4 +34,12 @@
 			ansible_winrm_kerberos_delegation=true
 			#location of python exe file in windows machine
 			ansible_python_interpreter=C:/Python312/python.exe
+		3. Create a playbook named *.yaml
+			---
 
+			- hosts: windows
+			  tasks:
+
+			  - name: ping windows machine
+			    win_ping:
+		4. Try running the playbook.
