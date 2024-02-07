@@ -1,0 +1,37 @@
+#Setting up windows node in ansible
+#
+
+	In windows machine:
+		1. Update the powershell to the latest version or download and install powershell-core 7.4 or latest version.
+		2. Using powershell install chocolatey the package manager for windows.
+			i. Run get-executionpolicy
+			ii. Run Set-ExecutionPolicy Allsigned or Set-ExecutionPolicy Bypass -Scope Process
+			iii. Run Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+		3. Set up winrm, see the link.
+			https://docs.ansible.com/ansible/latest/os_guide/windows_setup.html
+		4. Install python3
+
+	In master(linux machine where ansible is installed):
+		1. Create a config file.
+		2. Create an inventory file.
+			[windows]
+			xxx.xxx.xxx.xxx
+
+			[windows:vars]
+			#user account with administrative permission in windows machine
+			ansible_user=username
+			#password of user account in windows machine
+			ansible_password="password"
+			#port used by ansible, use 5985 for http and 5986 for https
+			ansible_port=5985
+			#connection type to be use, can be winrm or ssh
+			ansible_conneciton=winrm
+			#protocol to be used
+			ansible_winrm_scheme=http
+			#if certificate will be used
+			ansible_winrm_server_cert_validation=ignore
+			#authentication service
+			ansible_winrm_kerberos_delegation=true
+			#location of python exe file in windows machine
+			ansible_python_interpreter=C:/Python312/python.exe
+
