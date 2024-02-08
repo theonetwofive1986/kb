@@ -42,4 +42,4 @@
 
 			  - name: ping windows machine
 			    win_ping:
-		4. Try running the playbook.
+		4. Install Python3 and pywinrm
