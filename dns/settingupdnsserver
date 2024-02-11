@@ -3,7 +3,7 @@
 2. backup /etc/named.conf
 	sudo cp /etc/named.conf ~/backup/named.bak
 3. edit /etc/named.conf
-	allow-query { localhost; xxx.xxx.xxx.xxx/24; };
+	allow-query { localhost; 172.31.0.0/24; };
 4. add at the end of the line of /etc/named.conf
 
 	//forward zone
@@ -15,7 +15,7 @@ zone "janus.local" IN {
 };
 
 //backward zone
-zone "43.168.192.in-addr.arpa" IN {
+zone "0.31.172.in-addr.arpa" IN {
      type master;
      file "janus.local.rev";
      allow-update { none; };
@@ -38,14 +38,14 @@ $TTL 86400
 @ IN NS dns-primary.janus.local.
 
 ;IP Address for Name Server
-dns-primary IN A 192.168.43.35
+dns-primary IN A 172.31.0.5
 
 ;Mail Server MX (Mail exchanger) Record
 janus.local. IN MX 10 mail.janus.local.
 
 ;A Record for the following Host name
-www  IN   A   192.168.43.50
-mail IN   A   192.168.43.60
+www  IN   A   172.31.0.6
+mail IN   A   172.31.0.7
 
 ;CNAME Record
 ftp  IN   CNAME www.janus.local.
@@ -63,7 +63,7 @@ $TTL 86400
 )
 ;Name Server Information
 @ IN NS dns-primary.janus.local.
-dns-primary     IN      A       192.168.43.35
+dns-primary     IN      A       172.31.0.5
 
 ;Reverse lookup for Name Server
 35 IN PTR dns-primary.janus.local.
@@ -72,7 +72,7 @@ dns-primary     IN      A       192.168.43.35
 50      IN      PTR     www.janus.local.
 60      IN      PTR     mail.janus.local.
 
-7. change the file permission 
+7. change the file permission, owner and group owner
 	
 	# chown named:named /var/named/janus.local.db
 	# chown named:named /var/named/janus.local.rev
@@ -81,7 +81,7 @@ dns-primary     IN      A       192.168.43.35
 
 	# named-checkconf
 	# named-checkzone janus.local /var/named/janus.local.db
-	# named-checkzone 192.168.43.35 /var/named/janus.local.rev
+	# named-checkzone 172.31.0.5 /var/named/janus.local.rev
 
 9.restart the named service
 	sudo systemctl restart named
@@ -92,7 +92,3 @@ dns-primary     IN      A       192.168.43.35
 
 11. test the bind dns
 	# nslookup dns-primary.janus.local
-	# nslookup mail.janus.local
-	# nslookup www.janus.local
-	# nslookup ftp.janus.local
-
