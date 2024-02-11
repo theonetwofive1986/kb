@@ -1,0 +1,98 @@
+1. install bind
+	sudo yum install bind
+2. backup /etc/named.conf
+	sudo cp /etc/named.conf ~/backup/named.bak
+3. edit /etc/named.conf
+	allow-query { localhost; xxx.xxx.xxx.xxx/24; };
+4. add at the end of the line of /etc/named.conf
+
+	//forward zone
+zone "janus.local" IN {
+     type master;
+     file "janus.local.db";
+     allow-update { none; };
+     allow-query { any; };
+};
+
+//backward zone
+zone "43.168.192.in-addr.arpa" IN {
+     type master;
+     file "janus.local.rev";
+     allow-update { none; };
+     allow-query { any; };
+};
+
+5. create forward dns zone 
+
+# vim /var/named/janus.local.db
+$TTL 86400
+@ IN SOA dns-primary.janus.local. admin.janus.local. (
+                                                2020011800 ;Serial
+                                                3600 ;Refresh
+                                                1800 ;Retry
+                                                604800 ;Expire
+                                                86400 ;Minimum TTL
+)
+
+;Name Server Information
+@ IN NS dns-primary.janus.local.
+
+;IP Address for Name Server
+dns-primary IN A 192.168.43.35
+
+;Mail Server MX (Mail exchanger) Record
+janus.local. IN MX 10 mail.janus.local.
+
+;A Record for the following Host name
+www  IN   A   192.168.43.50
+mail IN   A   192.168.43.60
+
+;CNAME Record
+ftp  IN   CNAME www.janus.local.
+
+6. create reverse dns lookups
+
+# vim /var/named/janus.local.rev
+$TTL 86400
+@ IN SOA dns-primary.janus.local. admin.janus.local. (
+                                            2020011800 ;Serial
+                                            3600 ;Refresh
+                                            1800 ;Retry
+                                            604800 ;Expire
+                                            86400 ;Minimum TTL
+)
+;Name Server Information
+@ IN NS dns-primary.janus.local.
+dns-primary     IN      A       192.168.43.35
+
+;Reverse lookup for Name Server
+35 IN PTR dns-primary.janus.local.
+
+;PTR Record IP address to Hostname
+50      IN      PTR     www.janus.local.
+60      IN      PTR     mail.janus.local.
+
+7. change the file permission 
+	
+	# chown named:named /var/named/janus.local.db
+	# chown named:named /var/named/janus.local.rev
+
+8. check for syntactical error
+
+	# named-checkconf
+	# named-checkzone janus.local /var/named/janus.local.db
+	# named-checkzone 192.168.43.35 /var/named/janus.local.rev
+
+9.restart the named service
+	sudo systemctl restart named
+
+10. for client to accesds the dns service
+	# firewall-cmd  --add-service=dns --zone=public  --permanent
+	# firewall-cmd --reload
+
+11. test the bind dns
+	# nslookup dns-primary.janus.local
+	# nslookup mail.janus.local
+	# nslookup www.janus.local
+	# nslookup ftp.janus.local
+
